@@ -60,6 +60,17 @@ def env(name: str, required: bool = True, default: str | None = None) -> str | N
     return val
 
 
+class HeaderTransport(xmlrpc.client.Transport):
+    def __init__(self, headers=None, **kwargs):
+        super().__init__(**kwargs)
+        self.custom_headers = headers or []
+
+    def send_headers(self, connection, headers):
+        for k, v in self.custom_headers:
+            connection.putheader(k, v)
+        super().send_headers(connection, headers)
+
+
 # --------------------------------------------------------------------------- client
 class OdooClient:
     def __init__(self, url: str, db: str | None, user: str | None, secret: str | None,
@@ -81,7 +92,8 @@ class OdooClient:
             fh.write(json.dumps(entry, default=str) + "\n")
 
     def _proxy(self, endpoint: str):
-        return xmlrpc.client.ServerProxy(f"{self.url}/xmlrpc/2/{endpoint}", allow_none=True)
+        transport = HeaderTransport([("X-Odoo-Database", self.db)]) if self.db else None
+        return xmlrpc.client.ServerProxy(f"{self.url}/xmlrpc/2/{endpoint}", allow_none=True, transport=transport)
 
     # ---- server info
     def version(self) -> dict:
