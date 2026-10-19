@@ -1,4 +1,4 @@
-# Odoo Agent Skills
+# Odoo Agent Skills (Functional)
 
 A skill pack that lets **Claude Code, Antigravity and Codex** run an Odoo requirement analysis and demo workflow:
 
